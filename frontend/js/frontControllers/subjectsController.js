@@ -5,10 +5,15 @@
 *    License     : http://www.gnu.org/licenses/gpl.txt  GNU GPL 3.0
 *    Date        : Mayo 2025
 *    Status      : Prototype
-*    Iteration   : 1.0 ( prototype )
+*    Iteration   : 2.0 ( prototype )
 */
 
 import { subjectsAPI } from '../apiConsumers/subjectsAPI.js';
+//2.0
+//For pagination:
+    let currentPage = 1;
+    let totalPages = 1;
+    const limit = 5;
 
 document.addEventListener('DOMContentLoaded', () => 
 {
@@ -59,20 +64,51 @@ function setupCancelHandler()
         document.getElementById('subjectId').value = '';
     });
 }
-
-async function loadSubjects()
+//2.0
+function setupPaginationControls() 
 {
-    try
+    document.getElementById('prevPage').addEventListener('click', () => 
     {
-        const subjects = await subjectsAPI.fetchAll();
-        renderSubjectTable(subjects);
-    }
-    catch (err)
+        if (currentPage > 1) 
+        {
+            currentPage--;
+            loadSubjects();
+        }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', () => 
     {
-        console.error('Error cargando materias:', err.message);
-    }
+        if (currentPage < totalPages) 
+        {
+            currentPage++;
+            loadSubjects();
+        }
+    });
+
+    document.getElementById('resultsPerPage').addEventListener('change', e => 
+    {
+        currentPage = 1;
+        loadSubjects();
+    });
 }
 
+//2.0
+async function loadSubjects()
+{
+    try 
+    {
+        const resPerPage = parseInt(document.getElementById('resultsPerPage').value, 10) || limit;
+        const data = await subjectsAPI.fetchPaginated(currentPage, resPerPage);
+        console.log(data);
+        renderSubjectTable(data.subjects);
+        totalPages = Math.ceil(data.total / resPerPage);
+        document.getElementById('pageInfo').textContent = `Página ${currentPage} de ${totalPages}`;
+    } 
+    catch (err) 
+    {
+        console.error('Error cargando inscripciones:', err.message);
+    }
+}
 function renderSubjectTable(subjects)
 {
     const tbody = document.getElementById('subjectTableBody');

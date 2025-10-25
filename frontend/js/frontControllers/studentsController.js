@@ -98,7 +98,7 @@ function getFormData()
         age: parseInt(document.getElementById('age').value.trim(), 10)
     };
 }
-  
+
 function clearForm()
 {
     document.getElementById('studentForm').reset();
